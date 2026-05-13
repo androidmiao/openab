@@ -1,0 +1,37 @@
+# OpenAB + Claude Code + Discord — local Docker deployment
+#
+# Volumes:
+#   ./config.toml → /etc/openab/config.toml (read-only)
+#   claude-data    → /home/node             (Claude OAuth tokens + ~/.openab)
+#
+# Env from .env file (next to this docker-compose.yml):
+#   DISCORD_BOT_TOKEN=...
+#
+# Start:        docker compose up -d
+# Tail logs:    docker compose logs -f openab
+# Auth Claude:  docker compose exec openab claude auth login
+# Restart:      docker compose restart openab
+# Stop:         docker compose down
+
+services:
+  openab:
+    image: ghcr.io/openabdev/openab-claude:latest
+    container_name: openab-claude
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./config.toml:/etc/openab/config.toml:ro
+      - claude-data:/home/node
+    # OpenAB is outbound-only — no ports need to be exposed.
+    # The Discord adapter connects out via the Gateway WebSocket.
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -x openab || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  claude-data:
+    # Named volume so Claude's OAuth tokens survive `docker compose down`
+    # and only disappear if you explicitly `docker volume rm`.

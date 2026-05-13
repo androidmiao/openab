@@ -144,3 +144,5 @@ Read `docs/adr/` before implementing features in these areas:
 - Multi-platform adapters → `docs/adr/multi-platform-adapters.md`
 
 Write a new ADR if your feature introduces a new subsystem.
+
+## Imported Claude Cowork project instructions
